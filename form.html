@@ -1,0 +1,151 @@
+<div style="padding:4px;background:#eee;width:430px;border-radius:8px">
+  <div style="padding:4px;background:#ddd;border-radius:8px">
+    <p>
+    <strong>Always</strong> verify that you are on <strong>stwing.upenn.edu</strong> with a secure <strong>HTTPS</strong> connection before entering your STWing account password:
+    <br><img src="https_url.png" alt="image showing HTTPS in address bar">
+    </p>
+
+    <p>
+    <strong>NEVER reuse a password from another site!</strong>
+    </p>
+  </div>
+
+  <form action="https://www.stwing.upenn.edu/pw/" method="POST" onload="onload();">
+    <table>
+      <tr>
+        <td><label for="username">Username:</label></td>
+        <td><input type="text" id="username" name="username"></td>
+      </tr>
+      <tr>
+        <td><label for="password">Old Password:</label></td>
+        <td><input type="password" id="password" name="password"/></td>
+      </tr>
+      <tr>
+        <td><label for="newpw1">New Password:</label></td>
+        <td><input type="password" id="newpw1" name="newpw1"/></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <div class="bar" id="bar1"></div><div class="bar" id="bar2"></div><div class="bar" id="bar3"></div><div class="bar" id="bar4"></div>
+          <span id="score">0</span>/4
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <a href="https://en.wikipedia.org/wiki/Password_cracking#Time_needed_for_password_searches"
+            tabindex="-1"
+            target="_blank"
+            title="10 guesses/second: online attack on a service that doesn't ratelimit, or where an attacker has outsmarted ratelimiting.">
+            Online cracking time</a>:
+          <span id="cracktime">&nbsp;</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="height:80px;vertical-align:top" colspan="2">
+          <strong id="warning" style="color:#e00"></strong>
+          <span id="feedback" style="color:#b60"></span>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="newpw2">Verify Password:</label></td>
+        <td><input type="password" id="newpw2" name="newpw2"/></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" value="Submit" id="submit"/></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><strong id="error">&nbsp;</strong></td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<script src="zxcvbn.js"></script>
+<script>
+  'use strict';
+
+  var username  = document.getElementById('username');
+  var oldpw     = document.getElementById('password');
+  var newpw1    = document.getElementById('newpw1');
+  var newpw2    = document.getElementById('newpw2');
+  var score     = document.getElementById('score');
+  var cracktime = document.getElementById('cracktime');
+  var feedback  = document.getElementById('feedback');
+  var warning   = document.getElementById('warning');
+  var error     = document.getElementById('error');
+  var submit    = document.getElementById('submit');
+  var bars = [
+    document.getElementById('bar1'),
+    document.getElementById('bar2'),
+    document.getElementById('bar3'),
+    document.getElementById('bar4'),
+  ];
+
+  username.addEventListener("input", oninput);
+  oldpw.addEventListener("input", oninput);
+  newpw1.addEventListener("input", oninput);
+  newpw2.addEventListener("input", oninput);
+  oninput();
+
+  function oninput() {
+    if (newpw1.value.length == 0) {
+      error.innerText = "Password must be >= 8 characters.";
+      score.innerText = "0";
+      cracktime.innerText = "";
+      warning.innerText = "";
+      feedback.innerText = "";
+      submit.disabled = true;
+      return;
+    }
+    if (newpw1.value.length > 255) {
+      error.innerText = "Password must be <= 255 characters.";
+      score.innerText = "-";
+      cracktime.innerText = "";
+      warning.innerText = "";
+      feedback.innerText = "";
+      submit.disabled = true;
+      return;
+    }
+
+    var result = zxcvbn(newpw1.value, [username.value]);
+    score.innerText = result.score;
+    cracktime.innerText = result.crack_times_display.online_no_throttling_10_per_second;
+    warning.innerText = result.feedback.warning ? result.feedback.warning + "." : "";
+    feedback.innerText = result.feedback.suggestions && result.feedback.suggestions.length ? result.feedback.suggestions.join(". ") + "." : "";
+
+    var color = ['#f00', '#f00', '#f80', '#4f0', '#0f0'][result.score];
+    for (var i = 0; i < 4; i++) {
+      bars[i].style.background = i >= result.score ? "rgba(0,0,0,0)" : color;
+    }
+
+    var disabled = false;
+    if (username.value.length == 0 || password.value.length == 0) {
+      disabled = true;
+      error.innerText = "Please enter your current username and password.";
+    } else if (newpw1.value.length < 8) {
+      disabled = true;
+      error.innerText = "Password must be >= 8 characters.";
+    } else if (newpw1.value.length > 255) {
+      disabled = true;
+      error.innerText = "Password must be <= 255 characters.";
+    } else if (result.score < 3) {
+      disabled = true;
+      error.innerText = "Password strength must be >= 3.";
+    } else if (newpw1.value != newpw2.value) {
+      disabled = true;
+      error.innerText = "Passwords do not match.";
+    } else if (oldpw.value == newpw1.value) {
+      disabled = false;
+      error.innerText = "Password didn't change - this is OK, but not great. And never use a password you've used on another site!";
+    } else {
+      disabled = false;
+      error.innerText = "";
+    }
+
+    submit.disabled = disabled;
+  }
+</script>
