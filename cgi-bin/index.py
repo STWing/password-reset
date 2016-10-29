@@ -26,19 +26,19 @@ def main():
 
     form = cgi.FieldStorage()
 
-    username = form.getvalue('username')
+    username = form.getfirst('username')
     if username == None:
         # the form has not been submitted
         print_file('../form.html')
         return None
     dn = 'uid={},ou=People,dc=stwing,dc=upenn,dc=edu'.format(username)
 
-    oldpw = form.getvalue('password')
+    oldpw = form.getfirst('password')
     if oldpw == None or len(oldpw) < 1:
         return 'Old password not provided.'
 
-    newpw = form.getvalue('newpw1')
-    newpw2 = form.getvalue('newpw2')
+    newpw = form.getfirst('newpw1')
+    newpw2 = form.getfirst('newpw2')
     if newpw2 == None or newpw != newpw2:
         return 'New passwords do not match.'
     if newpw == None or len(newpw) < 8:

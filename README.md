@@ -2,4 +2,5 @@
 
 * by kainino
 
-(BTW: this is a git repo)
+**NOTE:** This webapp should be served DIRECTLY from the cgi-bin directory! The
+directory including `README.md`, `.git`, etc., should not be visible publicly.
