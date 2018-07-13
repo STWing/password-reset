@@ -111,11 +111,16 @@
       return;
     }
 
-    var result = zxcvbn(newpw1.value, [username.value]);
+    var result = zxcvbn(newpw1.value,
+        [username.value,
+         'stwing', 'penn', 'upenn',
+         'kings', 'court', 'kc', 'kcech', 'kceh',
+         'force', 'blimp']);
     score.innerText = result.score;
     cracktime.innerText = result.crack_times_display.online_no_throttling_10_per_second;
     warning.innerText = result.feedback.warning ? result.feedback.warning + "." : "";
-    feedback.innerText = result.feedback.suggestions && result.feedback.suggestions.length ? result.feedback.suggestions.join(". ") + "." : "";
+    feedback.innerText = (result.feedback.suggestions && result.feedback.suggestions.length) ?
+        result.feedback.suggestions.join(". ") + "." : "";
 
     var color = ['#f00', '#f00', '#f80', '#4f0', '#0f0'][result.score];
     for (var i = 0; i < 4; i++) {
@@ -140,7 +145,7 @@
       error.innerText = "Passwords do not match.";
     } else if (oldpw.value == newpw1.value) {
       disabled = false;
-      error.innerText = "Password didn't change - this is OK, but not great. And never use a password you've used on another site!";
+      error.innerText = "Password didn't change - this is OK, but consider setting a new one if you have used this one for a long time. NEVER use a password you've used on another site!";
     } else {
       disabled = false;
       error.innerText = "";
