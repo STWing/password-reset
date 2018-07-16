@@ -5,6 +5,8 @@ import cgi
 import cgitb
 import os
 import ldap
+import calendar, time
+import crypt
 #cgitb.enable()  # enable debug logging - TODO: comment this out
 
 def print_file(filename):
@@ -56,7 +58,11 @@ def main():
     if res[0] != 97:  # 97 = success
         return 'Failed to bind to LDAP server. Incorrect username/password?'
 
-    ld.passwd_s(dn, None, newpw)
+    attrs = [
+       (ldap.MOD_REPLACE,'userPassword',['{CRYPT}' + crypt.crypt(newpw,'$6$rounds=100001$%.16s')]),
+       (ldap.MOD_REPLACE,'shadowLastChange',[str(calendar.timegm(time.gmtime())/86400)])
+       ]
+    ld.modify_s(dn, attrs)
     print 'Your password has been reset. Please verify by logging into any STWing service.'
     return
 
